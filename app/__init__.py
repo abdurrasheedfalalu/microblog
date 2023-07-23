@@ -3,6 +3,9 @@ from config import Config
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_login import LoginManager
+from flask_mail import Mail
+from flask_bootstrap import Bootstrap
+
 
 import logging
 from logging.handlers import SMTPHandler
@@ -13,11 +16,13 @@ from logging.handlers import SMTPHandler
 app = Flask(__name__)
 # Initializing Application Configuration
 app.config.from_object(Config)
-# Extensions Initialization
+# Register an Extensions
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
+mail = Mail(app)
+bootstrap = Bootstrap(app)
 
 from app import routes, models, errors
 

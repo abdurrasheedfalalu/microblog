@@ -1,11 +1,13 @@
 from datetime import datetime
 from flask import flash, redirect, render_template, request, url_for
 from app import app, db
-from app.forms import EmptyForm, LoginForm, PostForm, RegistrationForm, EditProfileForm
+from app.forms import( EmptyForm, LoginForm, PostForm, RegistrationForm,
+                      EditProfileForm, ResetPasswordRequestForm, ResetPasswordForm)
 from flask_login import current_user, login_user, logout_user, login_required
 from werkzeug.urls import url_parse
 
 from app.models import Post, User
+from app.email import send_password_reset_email
 
 @app.before_request
 def before_request():
@@ -156,3 +158,35 @@ def unfollow(username):
         return redirect(url_for("user", username=username))
     else:
         return redirect(url_for("index"))
+
+
+
+@app.route("/reset_password_request", methods=["GET", "POST"])
+def reset_password_request():
+    if current_user.is_authenticated:
+        return redirect(url_for("index"))
+    form = ResetPasswordRequestForm()
+    if form.validate_on_submit():
+        user = User.query.filter_by(email=form.email.data).first()
+        if user:
+            send_password_reset_email(user)
+        flash("Check your email for the instructions to reset your password")
+        return redirect(url_for("login"))
+    return render_template("reset_password_request.html", title="Reset Password", form=form)
+
+
+
+@app.route("/reset_password/<token>", methods=["GET", "POST"])
+def reset_password(token):
+    if current_user.is_authenticated:
+        return redirect(url_for("index"))
+    user = User.verified_reset_password_token(token)
+    if not user:
+        return redirect(url_for("index"))
+    form = ResetPasswordForm()
+    if form.validate_on_submit():
+        user.set_password(form.password.data)
+        db.session.commit()
+        flash("Your password has been reset.")
+        return redirect(url_for("index"))
+    return render_template("reset_password.html", form=form)
