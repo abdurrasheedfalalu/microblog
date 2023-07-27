@@ -17,3 +17,6 @@ class Config(object):
     ADMINS = ['applicationsmailsender@gmail.com']
 
     POSTS_PER_PAGE = 10
+
+
+    LANGUAGES = ["en", "ha"]
