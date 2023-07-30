@@ -20,3 +20,5 @@ class Config(object):
 
 
     LANGUAGES = ["en", "ha"]
+
+    MS_TRANSLATOR_KEY = os.environ.get('MS_TRANSLATOR_KEY')
